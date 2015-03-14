@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Table of Contents
 - [Loading and preprocessing the data](#loading-and-preprocessing-the-data)
@@ -14,26 +9,41 @@ output:
 
 ## Set global options
 As of version 2, R Markdown no longer attaches the knitr package by default. (See [Migrating from R Markdown v1][1])
-```{r Set global options, echo = TRUE}
+
+```r
 # Use :: operator to properly reference opts_chunk from the knitr package
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r Load necessary plotting, and plotting helper libraries}
+
+```r
 # Use ggplot2 for plots
 require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
+```
+
+```r
 # Use scales library to help format time intervals in the time series plot
 require(scales)
 ```
 
-```{r Generate colorblind-friendly palette}
+```
+## Loading required package: scales
+```
+
+
+```r
 # Code chunk lifted from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
 ## Loading and preprocessing the data
-```{r Load the activity data}
+
+```r
 # Unzip and load the dataset
 unzip(zipfile = "activity.zip", exdir = "data")
 activityData <- read.csv(file = "data/activity.csv")
@@ -46,7 +56,7 @@ names(activityData) <- c("Steps", "Date", "Interval")
 totalObservations <- prettyNum(x = dim(activityData)[1], big.mark = ",")
 ```
 
-The activity monitoring data is provided in this repository in ZIP format. (See the file named `activity.zip` [here][2])  The dataset contains a total of `r totalObservations` observations.
+The activity monitoring data is provided in this repository in ZIP format. (See the file named `activity.zip` [here][2])  The dataset contains a total of 17,568 observations.
 
 The variables included in this dataset are:
 
@@ -60,18 +70,34 @@ interval
 :   Identifier for the 5-minute interval in which measurement was taken
 
 
-```{r Summarize the loaded activity data}
+
+```r
 knitr::kable(
     x = summary(object = activityData),
     caption = "Summary of loaded activity data")
 ```
 
 
+
+Table: Summary of loaded activity data
+
+         Steps               Date                 Interval      
+---  -----------------  ---------------------  -----------------
+     Min.   :  0.00     Min.   :2012-10-01     Min.   :   0.0   
+     1st Qu.:  0.00     1st Qu.:2012-10-16     1st Qu.: 588.8   
+     Median :  0.00     Median :2012-10-31     Median :1177.5   
+     Mean   : 37.38     Mean   :2012-10-31     Mean   :1177.5   
+     3rd Qu.: 12.00     3rd Qu.:2012-11-15     3rd Qu.:1766.2   
+     Max.   :806.00     Max.   :2012-11-30     Max.   :2355.0   
+     NA's   :2304       NA                     NA               
+
+
 ## What is mean total number of steps taken per day?
 
 The number steps taken each day is computed by aggregating daily collected data (ignoring missing values from the dataset).
 
-```{r Calculate total steps taken per day}
+
+```r
 # "na.action = na.pass" argument needed when using the ~ notation. Otherwise, NA values will be stripped out, and the mean and median values won't come out right.
 totalStepsPerDay <- aggregate(
     Steps ~ Date,
@@ -82,7 +108,8 @@ totalStepsPerDay <- aggregate(
 names(totalStepsPerDay) <- c("Date", "Steps")
 ```
 
-```{r Calculate mean and median values}
+
+```r
 # Compute and save the mean and median values for later use
 meanOfTotalSteps <- mean(x = totalStepsPerDay$Steps, na.rm = TRUE)
 medianOfTotalSteps <- median(x = totalStepsPerDay$Steps, na.rm = TRUE)
@@ -90,7 +117,8 @@ medianOfTotalSteps <- median(x = totalStepsPerDay$Steps, na.rm = TRUE)
 
 A plot of the distribution for the aggregated steps taken per day is shown below.
 
-```{r Display histogram of total steps taken per day}
+
+```r
 histogramSteps <- ggplot(
     data = totalStepsPerDay,
     aes(x = Steps)) +
@@ -134,10 +162,13 @@ histogramSteps <- ggplot(
 suppressMessages(print(histogramSteps))
 ```
 
+![](PA1_template_files/figure-html/Display histogram of total steps taken per day-1.png) 
+
 ## What is the average daily activity pattern?
 Using a time series plot of the average number of steps taken (across all observed days), for each 5-minute interval, we can examine the subject's daily activity patterns.
 
-```{r Computing and plotting average daily activity patterns}
+
+```r
 # Aggregate the activity data over the 5-minute intervals, across all observed days
 averageStepsFor5MinuteIntervals <- aggregate(
     Steps ~ Interval,
@@ -152,7 +183,8 @@ intervalStrings <- intervalToTimeString(averageStepsFor5MinuteIntervals$Interval
 averageStepsFor5MinuteIntervals$IntervalFormatted <- strptime(intervalStrings, format = "%H:%M")
 ```
 
-```{r Plot the aggregated time series data}
+
+```r
 # Create a data frame used to annotate the time series plot with maximum step values
 maxLabels <- averageStepsFor5MinuteIntervals[which.max(averageStepsFor5MinuteIntervals$Steps), ]
 maxLabels$StepsFormatted <- paste("maximum =", floor(maxLabels$Steps), "steps at", format(maxLabels$IntervalFormatted, format = "%H:%M"))
@@ -177,19 +209,23 @@ timeSeriesAverageDailyActivity <- ggplot(
 print(timeSeriesAverageDailyActivity)
 ```
 
-From the time series plot, we find that the interval with the maximum number of steps is *`r format(maxLabels$IntervalFormatted, format = "%H:%M")`*, having *`r floor(maxLabels$Steps)`* steps.
+![](PA1_template_files/figure-html/Plot the aggregated time series data-1.png) 
+
+From the time series plot, we find that the interval with the maximum number of steps is *08:35*, having *206* steps.
 
 
 ## Imputing missing values
-```{r Compute number of missing measurements}
+
+```r
 numberOfMissingMeasurements <- sum(is.na(activityData$Steps))
 ```
 
-Out of the `r totalObservations` measurements, `r prettyNum(numberOfMissingMeasurements, big.mark = ",")` values are missing.
+Out of the 17,568 measurements, 2,304 values are missing.
 
 A simple strategy for resolving this problem is to replace missing measurements with the mean for the corresponding time interval, computed above.
 
-```{r Fill in missing values using the interval mean values calculated above}
+
+```r
 # Deviation from instructions: Instead of generating a completely new imputed dataset, just augment the original with a new column
 activityData$StepsImputed <- activityData$Steps
 # Iterate over measurement indexes that are missing step values
@@ -203,7 +239,8 @@ for (i in which(is.na(activityData$Steps))) {
 
 The distribution plot after replacing missing step measurements is shown below. In the original dataset, the frequency of 0 values was higher since missing step measurements took on a value of 0. After replacing the missing step measurements with the mean for the associated time interval, across all observed days, the previously missing measurement frequencies are then distributed to their appropriate bins.
 
-```{r Calculate total steps taken per day (with NA values replaced)}
+
+```r
 # "na.action = na.pass" argument needed when using the ~ notation. Otherwise, NA values will be stripped out, and the mean and median values won't come out right.
 totalStepsPerDay <- aggregate(
     StepsImputed ~ Date,
@@ -214,13 +251,15 @@ totalStepsPerDay <- aggregate(
 names(totalStepsPerDay) <- c("Date", "Steps")
 ```
 
-```{r Calculate mean and median values (with NA values replaced)}
+
+```r
 # Compute and save the mean and median values for later use
 meanOfTotalSteps <- mean(x = totalStepsPerDay$Steps, na.rm = TRUE)
 medianOfTotalSteps <- median(x = totalStepsPerDay$Steps, na.rm = TRUE)
 ```
 
-```{r Display histogram of total steps taken per day (with NA values replaced)}
+
+```r
 histogramSteps <- ggplot(
     data = totalStepsPerDay,
     aes(x = Steps)) +
@@ -262,11 +301,14 @@ histogramSteps <- ggplot(
 suppressMessages(print(histogramSteps))
 ```
 
+![](PA1_template_files/figure-html/Display histogram of total steps taken per day (with NA values replaced)-1.png) 
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
 To further examine activity patterns, we can perform similar computations as done above, on a split of the dataset, between  weekdays and weekends.
 
-```{r Aggregate activity data for weekdays and weekends}
+
+```r
 # Create a new column to indicate the day of the week associated with the measurement date
 activityData <- transform(
     activityData,
@@ -293,7 +335,8 @@ averageStepsFor5MinuteIntervals$IntervalFormatted <- interval
 
 A side-by-side comparison can then be done for weekday and weekend activity patterns. Data gathered from the subject shows higher activity throughout the day on weekends, than is observed for weekdays.
 
-```{r Plot the aggregated time series data for weekdays and weekends}
+
+```r
 # Create a data frame used to annotate the time series plot with maximum step values
 maxLabels <- aggregate(
     Steps ~ Weekday,
@@ -325,6 +368,8 @@ timeSeriesAverageDailyActivity <- ggplot(
 
 print(timeSeriesAverageDailyActivity)
 ```
+
+![](PA1_template_files/figure-html/Plot the aggregated time series data for weekdays and weekends-1.png) 
 
 [1]: http://rmarkdown.rstudio.com/authoring_migrating_from_v1.html "Migrating from R Markdown v1"
 [2]: https://github.com/dataethos/RepData_PeerAssessment1 "GitHub repository for this project"
