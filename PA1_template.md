@@ -1,13 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 
-## Table of Contents
-- [Loading and preprocessing the data](#loading-and-preprocessing-the-data)
-- [What is mean total number of steps taken per day?](#what-is-mean-total-number-of-steps-taken-per-day)
-- [What is the average daily activity pattern?](#what-is-the-average-daily-activity-pattern)
-- [Imputing missing values](#imputing-missing-values)
-- [Are there differences in activity patterns between weekdays and weekends?](#are-there-differences-in-activity-patterns-between-weekdays-and-weekends)
-
-## Set global options
+# Processing Environment
 As of version 2, R Markdown no longer attaches the knitr package by default. (See [Migrating from R Markdown v1][1])
 
 ```r
@@ -23,6 +16,10 @@ require(ggplot2)
 
 ```
 ## Loading required package: ggplot2
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.1.2
 ```
 
 ```r
@@ -41,7 +38,7 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
-## Loading and preprocessing the data
+# Loading and preprocessing the data
 
 ```r
 # Unzip and load the dataset
@@ -92,7 +89,7 @@ Table: Summary of loaded activity data
      NA's   :2304       NA                     NA               
 
 
-## What is mean total number of steps taken per day?
+# What is mean total number of steps taken per day?
 
 The number steps taken each day is computed by aggregating daily collected data (ignoring missing values from the dataset).
 
@@ -164,7 +161,7 @@ suppressMessages(print(histogramSteps))
 
 ![](PA1_template_files/figure-html/Display histogram of total steps taken per day-1.png) 
 
-## What is the average daily activity pattern?
+# What is the average daily activity pattern?
 Using a time series plot of the average number of steps taken (across all observed days), for each 5-minute interval, we can examine the subject's daily activity patterns.
 
 
@@ -214,7 +211,7 @@ print(timeSeriesAverageDailyActivity)
 From the time series plot, we find that the interval with the maximum number of steps is *08:35*, having *206* steps.
 
 
-## Imputing missing values
+# Imputing missing values
 
 ```r
 numberOfMissingMeasurements <- sum(is.na(activityData$Steps))
@@ -304,7 +301,7 @@ suppressMessages(print(histogramSteps))
 ![](PA1_template_files/figure-html/Display histogram of total steps taken per day (with NA values replaced)-1.png) 
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+# Are there differences in activity patterns between weekdays and weekends?
 To further examine activity patterns, we can perform similar computations as done above, on a split of the dataset, between  weekdays and weekends.
 
 
